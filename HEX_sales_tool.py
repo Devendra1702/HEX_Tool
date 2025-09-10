@@ -17,7 +17,7 @@ eff = st.slider("Assumed effectiveness (%)", 50, 90, 70) / 100
 # --- Plate dimensions ---
 plate_length = st.number_input("Plate length (m)", min_value=0.1, value=0.5, step=0.05)
 plate_height = st.number_input("Plate height (m)", min_value=0.1, value=0.3, step=0.05)
-plate_width = st.number_input("Plate width (m)", min_value=0.001, value=0.003, step=0.001)
+plate_gap = st.number_input("Plate gap / spacing (m)", min_value=0.001, value=0.003, step=0.001)
 
 # --- Air properties (approx) ---
 cp = 1005  # J/kgK
@@ -58,12 +58,12 @@ if LMTD <= 0 or np.isnan(LMTD):
     st.error("❌ Invalid temperature difference. Check input conditions.")
     A_req = np.nan
     n_plates = 0
-    stack_width = 0
+    stack_depth = 0
 else:
     A_req = Q_calc/(U * LMTD)
     A_plate = plate_length * plate_height
     n_plates = int(np.ceil(A_req / A_plate))
-    stack_width = n_plates * plate_width
+    stack_depth = n_plates * plate_gap
 
     st.subheader("📊 Results")
     st.write(f"Heat duty handled: **{Q_calc/1000:.2f} kW**")
@@ -71,19 +71,19 @@ else:
     st.write(f"Cold outlet temp: **{T_cold_out:.1f} °C**")
     st.write(f"Required heat transfer area: **{A_req:.2f} m²**")
     st.write(f"Plate size: {plate_length:.2f} m × {plate_height:.2f} m")
-    st.write(f"Plate thickness/spacing: {plate_width*1000:.1f} mm")
+    st.write(f"Plate gap/spacing: {plate_gap*1000:.1f} mm")
     st.write(f"Number of plates required: {n_plates}")
-    st.write(f"Stack width: {stack_width*1000:.1f} mm")
+    st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
     # --- Vertical Plate Sketch ---
     fig, ax = plt.subplots(figsize=(8,4))
     for i in range(n_plates):
         color = 'red' if i%2==0 else 'blue'
-        ax.add_patch(plt.Rectangle((i*plate_width,0), plate_width*0.9, plate_height, facecolor=color, alpha=0.4))
+        ax.add_patch(plt.Rectangle((i*plate_gap,0), plate_gap*0.9, plate_height, facecolor=color, alpha=0.4))
 
-    ax.set_xlim(0, stack_width)
+    ax.set_xlim(0, stack_depth)
     ax.set_ylim(0, plate_height)
-    ax.set_xlabel("Stack width (m)")
+    ax.set_xlabel("Stack depth (m)")
     ax.set_ylabel("Plate height (m)")
     ax.set_title("Schematic: Hot (red) / Cold (blue) Channels (Vertical Plates)")
 
