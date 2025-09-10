@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # --- Handy Air-to-Air Plate HEX Sizing Tool ---
 st.title("📐 Plate Air-to-Air Heat Exchanger Sizing Tool")
@@ -19,7 +20,7 @@ plate_length = st.number_input("Plate length (m)", value=0.5)
 plate_height = st.number_input("Plate height (m)", value=0.3)
 plate_gap = st.number_input("Plate gap (m)", value=0.003, step=0.001, format="%.3f")
 
-# --- Air properties (approx) ---
+# --- Air properties ---
 cp = 1005  # J/kgK
 rho = 1.2  # kg/m3
 
@@ -74,32 +75,38 @@ else:
     st.write(f"Number of plates required: {n_plates}")
     st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
-    # --- Vertical Plate Sketch with Annotations ---
-    fig, ax = plt.subplots(figsize=(8,4))
+    # --- 3D Plot ---
+    fig = plt.figure(figsize=(10,6))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Draw plates as cuboids
     for i in range(n_plates):
         color = 'red' if i%2==0 else 'blue'
-        ax.add_patch(plt.Rectangle((i*plate_gap,0), plate_gap*0.8, plate_height, facecolor=color, alpha=0.4))
+        x0 = i * plate_gap
+        y0 = 0
+        z0 = 0
+        dx = plate_gap*0.8
+        dy = plate_length
+        dz = plate_height
+        xx = [x0, x0+dx, x0+dx, x0, x0, x0+dx, x0+dx, x0]
+        yy = [y0, y0, y0+dy, y0+dy, y0, y0, y0+dy, y0+dy]
+        zz = [z0, z0, z0, z0, z0+dz, z0+dz, z0+dz, z0+dz]
+        vertices = [list(zip(xx, yy, zz))]
+        ax.add_collection3d(Poly3DCollection(vertices, facecolors=color, alpha=0.5))
 
-    # Axis limits
+    # Set axes limits
     ax.set_xlim(0, stack_depth)
-    ax.set_ylim(0, plate_height)
-    ax.set_xlabel("Stack depth (m)")
-    ax.set_ylabel("Plate height (m)")
-    ax.set_title("Schematic: Hot (red) / Cold (blue) Channels (Vertical Plates)")
+    ax.set_ylim(0, plate_length)
+    ax.set_zlim(0, plate_height)
 
-    # --- Dimension Annotations ---
-    # Stack depth annotation
-    ax.annotate(f"{stack_depth:.3f} m", xy=(stack_depth/2, -0.02), xytext=(stack_depth/2, -0.05),
-                ha='center', arrowprops=dict(arrowstyle='<->'))
+    ax.set_xlabel('Stack depth (m)')
+    ax.set_ylabel('Plate length (m)')
+    ax.set_zlabel('Plate height (m)')
+    ax.set_title('3D Schematic: Hot (red) / Cold (blue) Channels')
 
-    # Plate height annotation
-    ax.annotate(f"{plate_height:.2f} m", xy=(-0.02, plate_height/2), xytext=(-0.06, plate_height/2),
-                va='center', ha='center', rotation=90,
-                arrowprops=dict(arrowstyle='<->'))
-
-    # Plate length annotation
-    ax.annotate(f"{plate_length:.2f} m", xy=(stack_depth+0.02, 0), xytext=(stack_depth+0.02, plate_height),
-                va='center', ha='left', rotation=90,
-                arrowprops=dict(arrowstyle='<->'))
+    # Add annotations
+    ax.text(stack_depth/2, -0.05, 0, f'Stack depth: {stack_depth:.3f} m', color='black', ha='center')
+    ax.text(-0.05, plate_length/2, plate_height/2, f'Plate length: {plate_length:.2f} m', color='black', rotation=90, va='center')
+    ax.text(-0.05, -0.05, plate_height/2, f'Plate height: {plate_height:.2f} m', color='black', rotation=90, va='center')
 
     st.pyplot(fig)
