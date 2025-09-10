@@ -76,7 +76,7 @@ else:
     st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
     # --- Clear 3D Plot ---
-    fig = plt.figure(figsize=(10,6))
+    fig = plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111, projection='3d')
 
     # Draw plates as cuboids
