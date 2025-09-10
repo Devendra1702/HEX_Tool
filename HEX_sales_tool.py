@@ -108,8 +108,8 @@ else:
     ax.set_title('3D Schematic: Hot (red) / Cold (blue) Channels')
 
     # Add annotations
-    ax.text(stack_depth/2, -0.05, 0, f'Stack depth: {stack_depth:.3f} m', color='black', ha='center')
-    ax.text(-0.05, plate_length/2, plate_height/2, f'Plate length: {plate_length:.2f} m', color='black', rotation=90, va='center')
-    ax.text(-0.05, -0.05, plate_height/2, f'Plate height: {plate_height:.2f} m', color='black', rotation=90, va='center')
+   # ax.text(stack_depth/2, -0.05, 0, f'Stack depth: {stack_depth:.3f} m', color='black', ha='center')
+   # ax.text(-0.05, plate_length/2, plate_height/2, f'Plate length: {plate_length:.2f} m', color='black', rotation=90, va='center')
+   # ax.text(-0.05, -0.05, plate_height/2, f'Plate height: {plate_height:.2f} m', color='black', rotation=90, va='center')
 
     st.pyplot(fig)
