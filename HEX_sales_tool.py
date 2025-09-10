@@ -75,7 +75,7 @@ else:
     st.write(f"Number of plates required: {n_plates}")
     st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
-    # --- 3D Plot ---
+    # --- Clear 3D Plot ---
     fig = plt.figure(figsize=(10,6))
     ax = fig.add_subplot(111, projection='3d')
 
@@ -85,20 +85,23 @@ else:
         x0 = i * plate_gap
         y0 = 0
         z0 = 0
-        dx = plate_gap*0.8
+        dx = plate_gap*0.9
         dy = plate_length
         dz = plate_height
         xx = [x0, x0+dx, x0+dx, x0, x0, x0+dx, x0+dx, x0]
         yy = [y0, y0, y0+dy, y0+dy, y0, y0, y0+dy, y0+dy]
         zz = [z0, z0, z0, z0, z0+dz, z0+dz, z0+dz, z0+dz]
         vertices = [list(zip(xx, yy, zz))]
-        ax.add_collection3d(Poly3DCollection(vertices, facecolors=color, alpha=0.5))
+        ax.add_collection3d(Poly3DCollection(vertices, facecolors=color, alpha=0.6, edgecolor='k'))
 
-    # Set axes limits
-    ax.set_xlim(0, stack_depth)
-    ax.set_ylim(0, plate_length)
-    ax.set_zlim(0, plate_height)
+    # Set aspect ratio for clarity
+    max_range = max(stack_depth, plate_length, plate_height)
+    ax.set_box_aspect([stack_depth/max_range, plate_length/max_range, plate_height/max_range])
 
+    # View angle for better perspective
+    ax.view_init(elev=30, azim=-60)
+
+    # Axes labels
     ax.set_xlabel('Stack depth (m)')
     ax.set_ylabel('Plate length (m)')
     ax.set_zlabel('Plate height (m)')
