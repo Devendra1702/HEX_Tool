@@ -15,7 +15,7 @@ flow_cold = st.number_input("Cold air flow rate (m³/h)", value=1000.0)
 eff = st.slider("Assumed effectiveness (%)", 50, 90, 70) / 100
 
 # --- Plate dimensions ---
-plate_length = st.number_input("Plate length (m)", min_value=0.1, value=0.5, step=0.05)
+plate_length = st.number_input("Plate Width (m)", min_value=0.1, value=0.5, step=0.05)
 plate_height = st.number_input("Plate height (m)", min_value=0.1, value=0.3, step=0.05)
 plate_gap = st.number_input("Plate gap / spacing (m)", min_value=0.001, value=0.003, step=0.001)
 
