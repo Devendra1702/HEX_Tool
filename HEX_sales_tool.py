@@ -14,10 +14,10 @@ flow_hot = st.number_input("Hot air flow rate (m³/h)", value=1000.0)
 flow_cold = st.number_input("Cold air flow rate (m³/h)", value=1000.0)
 eff = st.slider("Assumed effectiveness (%)", 50, 90, 70) / 100
 
-# --- Plate dimensions ---
-plate_length = st.number_input("Plate Width (m)", min_value=0.1, value=0.5, step=0.05)
-plate_height = st.number_input("Plate height (m)", min_value=0.1, value=0.3, step=0.05)
-plate_gap = st.number_input("Plate gap / spacing (m)", min_value=0.001, value=0.003, step=0.001)
+# Plate geometry inputs
+plate_length = st.number_input("Plate length (m)", value=0.5)
+plate_height = st.number_input("Plate height (m)", value=0.3)
+plate_gap = st.number_input("Plate gap (m)", value=0.003, step=0.001, format="%.3f")
 
 # --- Air properties (approx) ---
 cp = 1005  # J/kgK
@@ -70,21 +70,36 @@ else:
     st.write(f"Hot outlet temp: **{T_hot_out:.1f} °C**")
     st.write(f"Cold outlet temp: **{T_cold_out:.1f} °C**")
     st.write(f"Required heat transfer area: **{A_req:.2f} m²**")
-    st.write(f"Plate size: {plate_length:.2f} m × {plate_height:.2f} m")
-    st.write(f"Plate gap/spacing: {plate_gap*1000:.1f} mm")
+    st.write(f"Suggested plate size: {plate_length:.2f} m × {plate_height:.2f} m")
     st.write(f"Number of plates required: {n_plates}")
     st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
-    # --- Vertical Plate Sketch ---
+    # --- Vertical Plate Sketch with Annotations ---
     fig, ax = plt.subplots(figsize=(8,4))
     for i in range(n_plates):
         color = 'red' if i%2==0 else 'blue'
-        ax.add_patch(plt.Rectangle((i*plate_gap,0), plate_gap*0.9, plate_height, facecolor=color, alpha=0.4))
+        ax.add_patch(plt.Rectangle((i*plate_gap,0), plate_gap*0.8, plate_height, facecolor=color, alpha=0.4))
 
+    # Axis limits
     ax.set_xlim(0, stack_depth)
     ax.set_ylim(0, plate_height)
     ax.set_xlabel("Stack depth (m)")
     ax.set_ylabel("Plate height (m)")
     ax.set_title("Schematic: Hot (red) / Cold (blue) Channels (Vertical Plates)")
+
+    # --- Dimension Annotations ---
+    # Stack depth annotation
+    ax.annotate(f"{stack_depth:.3f} m", xy=(stack_depth/2, -0.02), xytext=(stack_depth/2, -0.05),
+                ha='center', arrowprops=dict(arrowstyle='<->'))
+
+    # Plate height annotation
+    ax.annotate(f"{plate_height:.2f} m", xy=(-0.02, plate_height/2), xytext=(-0.06, plate_height/2),
+                va='center', ha='center', rotation=90,
+                arrowprops=dict(arrowstyle='<->'))
+
+    # Plate length annotation
+    ax.annotate(f"{plate_length:.2f} m", xy=(stack_depth+0.02, 0), xytext=(stack_depth+0.02, plate_height),
+                va='center', ha='left', rotation=90,
+                arrowprops=dict(arrowstyle='<->'))
 
     st.pyplot(fig)
