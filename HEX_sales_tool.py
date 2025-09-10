@@ -14,6 +14,11 @@ flow_hot = st.number_input("Hot air flow rate (m³/h)", value=1000.0)
 flow_cold = st.number_input("Cold air flow rate (m³/h)", value=1000.0)
 eff = st.slider("Assumed effectiveness (%)", 50, 90, 70) / 100
 
+# --- Plate dimensions ---
+plate_length = st.number_input("Plate length (m)", min_value=0.1, value=0.5, step=0.05)
+plate_height = st.number_input("Plate height (m)", min_value=0.1, value=0.3, step=0.05)
+plate_width = st.number_input("Plate width (m)", min_value=0.001, value=0.003, step=0.001)
+
 # --- Air properties (approx) ---
 cp = 1005  # J/kgK
 rho = 1.2  # kg/m3
@@ -46,41 +51,40 @@ else:
     LMTD = (dT1 - dT2)/np.log(dT1/dT2)
 
 # Overall U value assumption (W/m²K)
-U = 35.0
+U = 25.0
 
 # Required area & plates
 if LMTD <= 0 or np.isnan(LMTD):
     st.error("❌ Invalid temperature difference. Check input conditions.")
     A_req = np.nan
     n_plates = 0
-    stack_depth = 0
+    stack_width = 0
 else:
     A_req = Q_calc/(U * LMTD)
-    plate_height = 0.5  # m (vertical height)
-    plate_width = 0.235   # m (horizontal width)
-    A_plate = plate_height * plate_width
+    A_plate = plate_length * plate_height
     n_plates = int(np.ceil(A_req / A_plate))
-    stack_depth = n_plates * 0.004  # 3 mm gap assumption (depth of stack)
+    stack_width = n_plates * plate_width
 
     st.subheader("📊 Results")
     st.write(f"Heat duty handled: **{Q_calc/1000:.2f} kW**")
     st.write(f"Hot outlet temp: **{T_hot_out:.1f} °C**")
     st.write(f"Cold outlet temp: **{T_cold_out:.1f} °C**")
     st.write(f"Required heat transfer area: **{A_req:.2f} m²**")
-    st.write(f"Suggested plate size: {plate_height:.2f} m × {plate_width:.2f} m")
+    st.write(f"Plate size: {plate_length:.2f} m × {plate_height:.2f} m")
+    st.write(f"Plate thickness/spacing: {plate_width*1000:.1f} mm")
     st.write(f"Number of plates required: {n_plates}")
-    st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
+    st.write(f"Stack width: {stack_width*1000:.1f} mm")
 
     # --- Vertical Plate Sketch ---
-    fig, ax = plt.subplots(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(8,4))
     for i in range(n_plates):
         color = 'red' if i%2==0 else 'blue'
-        ax.add_patch(plt.Rectangle((0,i*0.003), plate_width, 0.0025, facecolor=color, alpha=0.4))
+        ax.add_patch(plt.Rectangle((i*plate_width,0), plate_width*0.9, plate_height, facecolor=color, alpha=0.4))
 
-    ax.set_xlim(0, plate_width)
-    ax.set_ylim(0, stack_depth)
-    ax.set_xlabel("Plate width (m)")
-    ax.set_ylabel("Stack depth (m)")
-    ax.set_title("Schematic: Hot (red) / Cold (blue) Channels (Vertical Plate Orientation)")
+    ax.set_xlim(0, stack_width)
+    ax.set_ylim(0, plate_height)
+    ax.set_xlabel("Stack width (m)")
+    ax.set_ylabel("Plate height (m)")
+    ax.set_title("Schematic: Hot (red) / Cold (blue) Channels (Vertical Plates)")
 
     st.pyplot(fig)
