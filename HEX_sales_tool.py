@@ -4,7 +4,15 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # --- Add company logo ---
-st.image("logo.png", width=180)  # Place logo.png in same folder
+#st.image("logo.png", width=180)  # Place logo.png in same folder
+st.markdown(
+    """
+    <div style="text-align: center;">
+        <img src="logo.png" width="180">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # --- Handy Air-to-Air Plate HEX Sizing Tool ---
 st.title("📐 Plate Air-to-Air Heat Exchanger Sizing Tool")
@@ -19,7 +27,7 @@ flow_cold = st.number_input("Cold air flow rate (m³/h)", value=1000.0)
 eff = st.slider("Assumed effectiveness (%)", 50, 90, 70) / 100
 
 # Plate geometry inputs
-plate_length = st.number_input("Plate length (m)", value=0.5)
+plate_length = st.number_input("Plate Width (m)", value=0.5)
 plate_height = st.number_input("Plate height (m)", value=0.3)
 plate_gap = st.number_input("Plate gap (m)", value=0.003, step=0.001, format="%.3f")
 
@@ -62,12 +70,12 @@ if LMTD <= 0 or np.isnan(LMTD):
     st.error("❌ Invalid temperature difference. Check input conditions.")
     A_req = np.nan
     n_plates = 0
-    stack_depth = 0
+    stack_width = 0
 else:
     A_req = Q_calc/(U * LMTD)
     A_plate = plate_length * plate_height
     n_plates = int(np.ceil(A_req / A_plate))
-    stack_depth = n_plates * plate_gap
+    stack_width = n_plates * plate_gap
 
     st.subheader("📊 Results")
     st.write(f"Heat duty handled: **{Q_calc/1000:.2f} kW**")
@@ -76,7 +84,7 @@ else:
     st.write(f"Required heat transfer area: **{A_req:.2f} m²**")
     st.write(f"Suggested plate size: {plate_length:.2f} m × {plate_height:.2f} m")
     st.write(f"Number of plates required: {n_plates}")
-    st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
+    st.write(f"Stack width: {stack_width*1000:.1f} mm")
 
     # --- Proper 3D Plot ---
     fig = plt.figure(figsize=(10,6))
@@ -94,8 +102,8 @@ else:
         ax.add_collection3d(Poly3DCollection(verts, facecolors=color, alpha=0.6, edgecolor='k'))
 
     # Set aspect ratio for clarity
-    max_range = max(stack_depth, plate_length, plate_height)
-    ax.set_box_aspect([stack_depth/max_range, plate_length/max_range, plate_height/max_range])
+    max_range = max(stack_width, plate_length, plate_height)
+    ax.set_box_aspect([stack_width/max_range, plate_length/max_range, plate_height/max_range])
 
     # Set view
     ax.view_init(elev=20, azim=-60)
