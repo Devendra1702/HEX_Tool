@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+# --- Add company logo ---
+st.image("logo.png", width=200)  # Place logo.png in same folder
+
 # --- Handy Air-to-Air Plate HEX Sizing Tool ---
 st.title("📐 Plate Air-to-Air Heat Exchanger Sizing Tool")
 st.write("Handy calculator for sales team: estimate HEX size for given heat load.")
@@ -75,41 +78,32 @@ else:
     st.write(f"Number of plates required: {n_plates}")
     st.write(f"Stack depth: {stack_depth*1000:.1f} mm")
 
-    # --- Clear 3D Plot ---
-    fig = plt.figure(figsize=(20,15))
+    # --- Proper 3D Plot ---
+    fig = plt.figure(figsize=(10,6))
     ax = fig.add_subplot(111, projection='3d')
 
-    # Draw plates as cuboids
+    # Draw plates as thin rectangles stacked along X-axis
     for i in range(n_plates):
         color = 'red' if i%2==0 else 'blue'
         x0 = i * plate_gap
-        y0 = 0
-        z0 = 0
-        dx = plate_gap*0.9
-        dy = plate_length
-        dz = plate_height
-        xx = [x0, x0+dx, x0+dx, x0, x0, x0+dx, x0+dx, x0]
-        yy = [y0, y0, y0+dy, y0+dy, y0, y0, y0+dy, y0+dy]
-        zz = [z0, z0, z0, z0, z0+dz, z0+dz, z0+dz, z0+dz]
-        vertices = [list(zip(xx, yy, zz))]
-        ax.add_collection3d(Poly3DCollection(vertices, facecolors=color, alpha=0.6, edgecolor='k'))
+        # Rectangle corners (flat plate)
+        verts = [
+            [(x0, 0, 0), (x0, plate_length, 0), (x0, plate_length, plate_height), (x0, 0, plate_height)],
+            [(x0+0.001, 0, 0), (x0+0.001, plate_length, 0), (x0+0.001, plate_length, plate_height), (x0+0.001, 0, plate_height)]
+        ]
+        ax.add_collection3d(Poly3DCollection(verts, facecolors=color, alpha=0.6, edgecolor='k'))
 
     # Set aspect ratio for clarity
     max_range = max(stack_depth, plate_length, plate_height)
     ax.set_box_aspect([stack_depth/max_range, plate_length/max_range, plate_height/max_range])
 
-    # View angle for better perspective
-    ax.view_init(elev=30, azim=-60)
+    # Set view
+    ax.view_init(elev=20, azim=-60)
 
     # Axes labels
     ax.set_xlabel('Stack depth (m)')
     ax.set_ylabel('Plate length (m)')
     ax.set_zlabel('Plate height (m)')
     ax.set_title('3D Schematic: Hot (red) / Cold (blue) Channels')
-
-    # Add annotations
-   # ax.text(stack_depth/2, -0.05, 0, f'Stack depth: {stack_depth:.3f} m', color='black', ha='center')
-   # ax.text(-0.05, plate_length/2, plate_height/2, f'Plate length: {plate_length:.2f} m', color='black', rotation=90, va='center')
-   # ax.text(-0.05, -0.05, plate_height/2, f'Plate height: {plate_height:.2f} m', color='black', rotation=90, va='center')
 
     st.pyplot(fig)
