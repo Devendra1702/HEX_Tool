@@ -4,15 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # --- Add company logo ---
-#st.image("logo.png", width=180)  # Place logo.png in same folder
-st.markdown(
-    """
-    <div style="text-align: center;">
-        <img src="logo.png" width="180">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.image("logo.png", width=180)  # Place logo.png in same folder
 
 # --- Handy Air-to-Air Plate HEX Sizing Tool ---
 st.title("📐 Plate Air-to-Air Heat Exchanger Sizing Tool")
